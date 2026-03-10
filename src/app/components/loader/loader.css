@@ -1,0 +1,173 @@
+.loader-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+    width: 100%;
+}
+
+.loader-text {
+    margin-top: 2rem;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    color: #16a34a;
+    /* green-600 */
+    letter-spacing: 0.05em;
+    animation: pulse 2s infinite ease-in-out;
+}
+
+/* Book Animation */
+.book {
+    --pg-amt: 5;
+    position: relative;
+    width: 8rem;
+    height: 6rem;
+    display: flex;
+    perspective: 1200px;
+}
+
+.book__pg {
+    --pg-turn-duration: 2s;
+    /* Slower, smoother turn */
+    --pg-delay: 0.4s;
+    /* Delay between pages */
+
+    position: absolute;
+    width: 4rem;
+    /* Half the book width */
+    height: 100%;
+    top: 0;
+    right: 0;
+    background-color: #f6f6f6;
+    /* Off-white page */
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0) 10%);
+    border-radius: 0 4px 4px 0;
+    /* Rounded outer edge */
+    transform-origin: left center;
+    border: 1px solid #e5e5e5;
+    border-left: none;
+}
+
+/* Page Shadows (static layers) */
+.book__pg-shadow {
+    position: absolute;
+    right: 0;
+    width: 4rem;
+    height: 100%;
+    border-radius: 0 4px 4px 0;
+    background: repeating-linear-gradient(to right,
+            #f6f6f6 0%,
+            #f6f6f6 5%,
+            #e5e5e5 5.5%,
+            #e5e5e5 6%);
+    z-index: 1;
+    box-shadow:
+        inset -2px 0 4px rgba(0, 0, 0, 0.05),
+        /* Inner shadow */
+        5px 5px 15px rgba(0, 0, 0, 0.1);
+    /* Drop shadow beneath book */
+}
+
+/* Flipping Animation */
+.book__pg {
+    animation: flip var(--pg-turn-duration) ease-in-out infinite;
+    animation-fill-mode: forwards;
+    /* Backface visibility ensures seeing the "back" of the page as it turns */
+    transform-style: preserve-3d;
+}
+
+/* Back of the page styling (when flipped) */
+.book__pg::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #f1f1f1;
+    background-image: linear-gradient(to left, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0) 10%);
+    border-radius: 4px 0 0 4px;
+    transform: rotateY(180deg);
+    backface-visibility: hidden;
+    border: 1px solid #e5e5e5;
+    border-right: none;
+}
+
+/* Stagger pages */
+.book__pg:nth-child(2) {
+    animation-delay: calc(var(--pg-delay) * 0);
+    z-index: 6;
+}
+
+.book__pg:nth-child(3) {
+    animation-delay: calc(var(--pg-delay) * 1);
+    z-index: 5;
+}
+
+.book__pg:nth-child(4) {
+    animation-delay: calc(var(--pg-delay) * 2);
+    z-index: 4;
+}
+
+.book__pg:nth-child(5) {
+    animation-delay: calc(var(--pg-delay) * 3);
+    z-index: 3;
+}
+
+.book__pg:nth-child(6) {
+    animation-delay: calc(var(--pg-delay) * 4);
+    z-index: 2;
+}
+
+@keyframes flip {
+    0% {
+        transform: rotateY(0deg);
+        box-shadow: inset 1px 0 2px rgba(0, 0, 0, 0.05);
+        background-color: #dcfce7;
+        /* green-100 */
+    }
+
+    15% {
+        /* Start lifting */
+        box-shadow: -2px 2px 5px rgba(0, 0, 0, 0.1);
+        background-color: #bbf7d0;
+        /* green-200 */
+    }
+
+    50% {
+        /* Mid-turn, fully vertical */
+        transform: rotateY(-90deg);
+        box-shadow: -2px 2px 10px rgba(0, 0, 0, 0.1);
+        background-color: #86efac;
+        /* green-300 - darkest point */
+    }
+
+    85% {
+        /* Landing */
+        box-shadow: inset -1px 0 2px rgba(0, 0, 0, 0.05);
+        background-color: #dcfce7;
+        /* green-100 */
+    }
+
+    100% {
+        transform: rotateY(-180deg);
+        box-shadow: inset -1px 0 2px rgba(0, 0, 0, 0.05);
+        background-color: #f0fdf4;
+        /* green-50 - almost white when landed */
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 0.6;
+        transform: scale(0.98);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

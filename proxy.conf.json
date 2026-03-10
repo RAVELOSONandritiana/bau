@@ -1,0 +1,13 @@
+{
+  "/api": {
+    "target": "http://localhost:3000",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/files": {
+    "target": "http://192.168.1.183",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}

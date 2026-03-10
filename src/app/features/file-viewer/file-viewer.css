@@ -1,0 +1,63 @@
+:host {
+    display: block;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+
+main {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.shadow-2xl {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.pdf-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0);
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    cursor: default;
+    z-index: 100;
+    pointer-events: none;
+    /* Let scroll through to the canvas */
+}
+
+.pdf-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Hide default ng2-pdf-viewer loading indicator */
+::ng-deep .ng2-pdf-viewer-container .pdfViewer .page .loadingIcon {
+    display: none !important;
+}
+
+
+@media print {
+    :host {
+        display: block !important;
+    }
+
+    .print\:hidden {
+        display: none !important;
+    }
+
+    .print\:flex {
+        display: flex !important;
+    }
+}

@@ -1,0 +1,233 @@
+<app-header></app-header>
+
+<div class="min-h-screen bg-slate-50 py-16" appScrollAnimation>
+    <!-- Hero Section -->
+    <div class="max-w-5xl mx-auto px-6 mb-16">
+        <div class="text-left" appScrollAnimation animationType="fade-up">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">Centre d'aide</h1>
+            <p class="text-lg text-gray-600">Apprenez à utiliser efficacement la bibliothèque numérique</p>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="max-w-5xl mx-auto px-6 space-y-8">
+        <!-- Search Guide -->
+        <div class="bg-white rounded-xl p-8 shadow-sm" appScrollAnimation animationType="fade-up">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center shrink-0">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+                <h2 class="text-xl font-semibold text-gray-900">Comment effectuer une recherche</h2>
+            </div>
+
+            <div class="space-y-8">
+                <div>
+                    <h3 class="text-base font-medium text-gray-800 mb-3">1. Recherche globale</h3>
+                    <p class="text-gray-600 mb-3">Le champ <span class="font-medium">"Rechercher..."</span> permet de rechercher simultanément dans le titre, l'auteur, la description et les mots-clés des ouvrages.</p>
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <p class="text-sm text-green-700"><strong>Exemple :</strong> Tapez "Madagascar" pour trouver tous les livres mentionnant Madagascar dans n'importe quel champ.</p>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-base font-medium text-gray-800 mb-3">2. Recherche par champs spécifiques</h3>
+                    <div class="space-y-4">
+                        <div class="flex gap-3">
+                            <div class="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 shrink-0"></div>
+                            <div>
+                                <p class="font-medium text-gray-800">Titre du livre</p>
+                                <p class="text-sm text-gray-500">Recherchez un ouvrage par son titre exact ou partiel.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <div class="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 shrink-0"></div>
+                            <div>
+                                <p class="font-medium text-gray-800">Nom de l'auteur</p>
+                                <p class="text-sm text-gray-500">Trouvez tous les ouvrages d'un auteur spécifique.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <div class="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 shrink-0"></div>
+                            <div>
+                                <p class="font-medium text-gray-800">Mots-clés</p>
+                                <p class="text-sm text-gray-500">Séparez plusieurs mots-clés par des virgules pour affiner votre recherche.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-base font-medium text-gray-800 mb-3">3. Filtrer par période</h3>
+                    <p class="text-gray-600 mb-3">Utilisez les champs <span class="font-medium">"Année : Début → Fin"</span> pour limiter les résultats à une période spécifique.</p>
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <p class="text-sm text-green-700"><strong>Astuce :</strong> Laissez le champ "Fin" vide pour rechercher tous les ouvrages à partir d'une année donnée.</p>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-base font-medium text-gray-800 mb-3">4. Choisir la base de données</h3>
+                    <p class="text-gray-600 mb-3">Sélectionnez la collection dans laquelle effectuer votre recherche :</p>
+                    <ul class="space-y-2 ml-2">
+                        <li class="text-gray-600">• <span class="font-medium">Toutes les bases</span> : recherche dans toutes les collections</li>
+                        <li class="text-gray-600">• <span class="font-medium">P.A.MA.L</span> : Périodiques Anciens déposés à la Bibliothèque et Archives Universitaires</li>
+                        <li class="text-gray-600">• <span class="font-medium">BUTANA</span> : Bibliothèque Universitaire d'Antananarivo</li>
+                        <li class="text-gray-600">• <span class="font-medium">Livres</span> : Bibliothèque et Archives Universitaires</li>
+                        <li class="text-gray-600">• <span class="font-medium">Fonds Grandidier</span> : Collection sur l'histoire et la culture malgache</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-base font-medium text-gray-800 mb-3">5. Nombre de résultats par page</h3>
+                    <p class="text-gray-600">Choisissez combien de livres afficher par page (10, 20, 30, 40 ou 50) pour faciliter la navigation.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Guide -->
+        <div class="bg-white rounded-xl p-8 shadow-sm" appScrollAnimation animationType="fade-up" [animationDelay]="100">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center shrink-0">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                        </path>
+                    </svg>
+                </div>
+                <h2 class="text-xl font-semibold text-gray-900">Consulter les résultats</h2>
+            </div>
+
+            <div class="space-y-6">
+                <div>
+                    <h3 class="text-base font-medium text-gray-800 mb-2">Trier les résultats</h3>
+                    <p class="text-gray-600">Utilisez le menu déroulant <span class="font-medium">"Trier par"</span> pour organiser les résultats par titre, auteur ou année, dans l'ordre croissant ou décroissant.</p>
+                </div>
+
+                <div>
+                    <h3 class="text-base font-medium text-gray-800 mb-2">Filtrer rapidement</h3>
+                    <p class="text-gray-600">En haut de page, utilisez la barre de filtrage rapide pour affiner vos résultats par titre, description, auteur ou année sans relancer une nouvelle recherche.</p>
+                </div>
+
+                <div>
+                    <h3 class="text-base font-medium text-gray-800 mb-2">Voir plus de détails</h3>
+                    <p class="text-gray-600">Cliquez sur <span class="font-medium">"Lire plus →"</span> pour afficher la description complète d'un ouvrage dans une fenêtre modale.</p>
+                </div>
+
+                <div>
+                    <h3 class="text-base font-medium text-gray-800 mb-2">Accéder au document</h3>
+                    <p class="text-gray-600">Cliquez sur <span class="font-medium">"Ouvrir le document →"</span> pour consulter le PDF de l'ouvrage dans un nouvel onglet.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ -->
+        <div class="bg-white rounded-xl p-8 shadow-sm" appScrollAnimation animationType="fade-up" [animationDelay]="200">
+            <h2 class="text-xl font-semibold text-gray-900 mb-6">Questions fréquentes</h2>
+
+            <div class="divide-y divide-gray-100">
+                <div class="py-5">
+                    <button (click)="toggleFaq('q1')" class="w-full flex items-center justify-between text-left group">
+                        <span class="text-base font-medium text-gray-800 group-hover:text-green-600 transition-colors">Comment accéder aux documents ?</span>
+                        <div [class.rotate-180]="faqStates['q1']"
+                            class="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center transition-transform duration-300">
+                            <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </button>
+                    <div [class.hidden]="!faqStates['q1']" class="mt-4 text-gray-500 leading-relaxed">
+                        Les collections présentes sur cette plateforme sont accessibles pour consultation en ligne, dans le but de promouvoir la culture et le savoir.
+                    </div>
+                </div>
+
+                <div class="py-5">
+                    <button (click)="toggleFaq('q2')" class="w-full flex items-center justify-between text-left group">
+                        <span class="text-base font-medium text-gray-800 group-hover:text-green-600 transition-colors">Puis-je télécharger les livres ?</span>
+                        <div [class.rotate-180]="faqStates['q2']"
+                            class="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center transition-transform duration-300">
+                            <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </button>
+                    <div [class.hidden]="!faqStates['q2']" class="mt-4 text-gray-500 leading-relaxed">
+                        Actuellement, la plateforme est optimisée pour la consultation en ligne via notre visionneuse sécurisée. Cette mesure permet de garantir l'intégrité et la protection des droits de diffusion des documents.
+                    </div>
+                </div>
+
+                <div class="py-5">
+                    <button (click)="toggleFaq('q3')" class="w-full flex items-center justify-between text-left group">
+                        <span class="text-base font-medium text-gray-800 group-hover:text-green-600 transition-colors">Quelles sont les collections disponibles ?</span>
+                        <div [class.rotate-180]="faqStates['q3']"
+                            class="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center transition-transform duration-300">
+                            <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </button>
+                    <div [class.hidden]="!faqStates['q3']" class="mt-4 text-gray-500 leading-relaxed">
+                        Nous regroupons des fonds de différentes origines. Vous pouvez explorer les collections P.A.MA.L, BUTANA, Livres et le Fonds Grandidier, couvrant l'histoire et la culture malgache.
+                    </div>
+                </div>
+
+                <div class="py-5">
+                    <button (click)="toggleFaq('q4')" class="w-full flex items-center justify-between text-left group">
+                        <span class="text-base font-medium text-gray-800 group-hover:text-green-600 transition-colors">Comment signaler une erreur d'information ?</span>
+                        <div [class.rotate-180]="faqStates['q4']"
+                            class="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center transition-transform duration-300">
+                            <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </button>
+                    <div [class.hidden]="!faqStates['q4']" class="mt-4 text-gray-500 leading-relaxed">
+                        La précision historique est notre priorité. Si vous remarquez une inexactitude, vous pouvez nous contacter via les informations de contact situées en bas de page pour nous le signaler.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tips -->
+        <div class="bg-white rounded-xl p-8 shadow-sm" appScrollAnimation animationType="fade-up" [animationDelay]="300">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-12 h-12 bg-amber-50 rounded-lg flex items-center justify-center shrink-0">
+                    <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z">
+                        </path>
+                    </svg>
+                </div>
+                <h2 class="text-xl font-semibold text-gray-900">Conseils pour une recherche efficace</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4">
+                <div class="bg-green-50 rounded-lg p-4">
+                    <h4 class="font-medium text-gray-800 mb-2">Soyez précis</h4>
+                    <p class="text-sm text-gray-600">Plus votre recherche est précise, meilleurs seront les résultats. Utilisez les champs spécifiques plutôt que la recherche globale.</p>
+                </div>
+                <div class="bg-green-50 rounded-lg p-4">
+                    <h4 class="font-medium text-gray-800 mb-2">Combinez les critères</h4>
+                    <p class="text-sm text-gray-600">N'hésitez pas à combiner plusieurs critères (auteur + année, titre + mots-clés) pour affiner votre recherche.</p>
+                </div>
+                <div class="bg-green-50 rounded-lg p-4">
+                    <h4 class="font-medium text-gray-800 mb-2">Utilisez le bouton Réinitialiser</h4>
+                    <p class="text-sm text-gray-600">Si vous voulez recommencer une recherche, cliquez sur "Réinitialiser" pour effacer tous les champs.</p>
+                </div>
+                <div class="bg-green-50 rounded-lg p-4">
+                    <h4 class="font-medium text-gray-800 mb-2">Essayez différentes formulations</h4>
+                    <p class="text-sm text-gray-600">Si vous ne trouvez pas ce que vous cherchez, essayez des synonymes ou des mots-clés alternatifs.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact -->
+        <div class="text-left p-8 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl shadow-sm" appScrollAnimation animationType="fade-up" [animationDelay]="400">
+            <h3 class="text-base font-medium text-gray-800 mb-2">Besoin d'aide supplémentaire ?</h3>
+            <p class="text-gray-500">Si vous rencontrez des difficultés ou avez des questions, n'hésitez pas à nous contacter.</p>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,121 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+/* Standardized Custom Select */
+.form-select-custom {
+    @apply w-full pl-4 pr-10 py-2.5 border border-gray-300 rounded-lg bg-white text-base sm:text-sm text-gray-900 cursor-pointer focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none transition-all shadow-sm hover:border-green-300;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2322c55e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-size: 1.25rem;
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+}
+
+/* Scroll Animation Styles */
+.scroll-animate-item {
+    will-change: opacity, transform;
+    opacity: 0;
+}
+
+.scroll-animate-item.animate-active {
+    opacity: 1;
+}
+
+/* Fade Up Animation - Smooth version */
+.animate-fade-up {
+    transform: translateY(30px);
+}
+
+.animate-fade-up.animate-active {
+    animation: fadeUp var(--animation-duration, 800ms) cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Fade In Animation - Very smooth */
+.animate-fade-in {
+    transform: scale(0.96);
+}
+
+.animate-fade-in.animate-active {
+    animation: fadeIn var(--animation-duration, 800ms) cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Slide Left Animation */
+.animate-slide-left {
+    transform: translateX(40px);
+}
+
+.animate-slide-left.animate-active {
+    animation: slideLeft var(--animation-duration, 800ms) cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes slideLeft {
+    from {
+        opacity: 0;
+        transform: translateX(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Slide Right Animation */
+.animate-slide-right {
+    transform: translateX(-40px);
+}
+
+.animate-slide-right.animate-active {
+    animation: slideRight var(--animation-duration, 800ms) cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes slideRight {
+    from {
+        opacity: 0;
+        transform: translateX(-40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Scale Up Animation */
+.animate-scale-up {
+    transform: scale(0.92);
+}
+
+.animate-scale-up.animate-active {
+    animation: scaleUp var(--animation-duration, 800ms) cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes scaleUp {
+    from {
+        opacity: 0;
+        transform: scale(0.92);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

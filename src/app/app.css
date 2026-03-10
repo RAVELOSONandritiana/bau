@@ -1,0 +1,21 @@
+/* Styles pour rendre les éléments responsives */
+@media (max-width: 768px) {
+    /* Header adjustments for mobile */
+    .header-mobile {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    /* Select and input adjustments for mobile */
+    .filter-select,
+    .filter-input {
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    /* Ensure the logo and text are always visible */
+    .logo-text {
+        display: flex !important;
+        flex-direction: column;
+    }
+}

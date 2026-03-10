@@ -1,0 +1,105 @@
+@if (!isCollectionContext) {
+<app-header></app-header>
+}
+<div class="min-h-screen bg-white flex items-center justify-center p-4" appScrollAnimation>
+    <div class="w-full max-w-3xl">
+        <div class="text-center mb-6" appScrollAnimation animationType="fade-up">
+            <h1 class="text-3xl font-bold text-gray-900 mb-1">Bibliothèque Numérique</h1>
+            <p class="text-sm text-gray-400">Rechercher dans la bibliothèque</p>
+        </div>
+        <div class="bg-white border border-green-200 rounded-lg shadow-sm p-6" appScrollAnimation animationType="fade-up" [animationDelay]="100">
+            <form [formGroup]="form" class="space-y-4">
+                <!-- Champs de recherche avancée (toujours affichés) -->
+                <div class="space-y-4">
+                    <div>
+                        <input formControlName="q" placeholder="Rechercher..."
+                            class="w-full border border-gray-300 rounded-lg bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <input placeholder="Titre du livre" formControlName="title"
+                            class="w-full border border-gray-300 rounded-lg bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <input placeholder="Nom de l'auteur" formControlName="author"
+                            class="w-full border border-gray-300 rounded-lg bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    </div>
+
+                    <div>
+                        <input placeholder="Mots-clés (séparez par des virgules)" formControlName="subject"
+                            class="w-full border border-gray-300 rounded-lg bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <span class="text-sm text-gray-600 whitespace-nowrap">Année :</span>
+                        <input type="number" formControlName="yearStart" [min]="minYear" [max]="maxYear"
+                            placeholder="Début"
+                            class="w-28 border border-gray-300 rounded-lg bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <span class="text-gray-400">→</span>
+                        <input type="number" formControlName="yearEnd" placeholder="Fin" [max]="maxYear" [min]="minYear"
+                            class="w-28 border border-gray-300 rounded-lg bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    </div>
+                </div>
+
+                <!-- Source et résultats par page (toujours affichés) -->
+                <div class="space-y-3">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                        <div class="relative group" *ngIf="!isCollectionContext">
+                            <label
+                                class="block text-sm font-medium text-gray-700 mb-1.5 transition-colors group-hover:text-green-600">Source</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="h-5 w-5 text-gray-400 group-hover:text-green-500 transition-colors"
+                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                    </svg>
+                                </div>
+                                <select formControlName="source" class="form-select-custom !pl-10">
+                                    <option *ngFor="let source of sources" [value]="source.value">{{ source.label }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="relative group" [class.md:col-span-2]="isCollectionContext">
+                            <label
+                                class="block text-sm font-medium text-gray-700 mb-1.5 transition-colors group-hover:text-green-600">Résultats
+                                par page</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="h-5 w-5 text-gray-400 group-hover:text-green-500 transition-colors"
+                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                                    </svg>
+                                </div>
+                                <select formControlName="limit" class="form-select-custom !pl-10">
+                                    <option *ngFor="let item of limits" [ngValue]="item">{{item}}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="flex gap-3 pt-3">
+                    <a [routerLink]="isCollectionContext ? ['./result'] : '/result'" [queryParams]="getQueryParams()"
+                        class="flex-1 py-2.5 px-6 rounded-lg bg-green-500 text-white hover:bg-green-600 font-medium shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer text-center">
+                        Rechercher
+                    </a>
+                    <button type="button"
+                        class="px-6 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 font-medium transition-all duration-200 cursor-pointer"
+                        (click)="reset()">
+                        Réinitialiser
+                    </button>
+                </div>
+            </form>
+
+            <div class="text-center mt-4 pt-3 border-t border-green-200">
+                <a routerLink="/help" class="text-xs text-green-600 hover:text-green-500 transition-colors">
+                    Besoin d'aide ?
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>

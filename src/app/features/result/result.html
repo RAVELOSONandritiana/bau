@@ -1,0 +1,278 @@
+<app-header></app-header>
+
+<!-- Filter Bar (Restored consistency with common style) -->
+<div class="w-full bg-white border-b border-green-200 shadow-sm text-gray-900 py-4" appScrollAnimation>
+    <div
+        class="mx-auto max-w-7xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-6 lg:px-20">
+        <div class="flex items-center gap-2" appScrollAnimation animationType="fade-up">
+            <h2 class="text-xl font-bold text-gray-800">Résultats</h2>
+            @if (isCollectionContext) {
+            <span
+                class="px-2 py-0.5 bg-green-50 text-green-700 rounded-md text-[10px] font-bold uppercase border border-green-100">{{
+                collectionName }}</span>
+            }
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center gap-2 ml-auto w-full sm:w-auto">
+            <div class="flex flex-row items-center gap-2 w-full sm:w-auto">
+                <select (change)="handleFilterCriteriaChange($any($event.target).value)" [value]="filterCriteria"
+                    [disabled]="loading" class="form-select-custom w-1/3 sm:w-auto">
+                    <option value="title">Titre</option>
+                    <option value="description">Description</option>
+                    <option value="author">Auteur</option>
+                </select>
+
+                <div class="relative w-2/3 sm:w-64">
+                    <input type="search" [disabled]="loading"
+                        [placeholder]="filterCriteria === 'title' ? 'Titre...' : filterCriteria === 'description' ? 'Description...' : 'Auteur...'"
+                        [(ngModel)]="filterValue" (ngModelChange)="onFilterChange()"
+                        class="w-full border border-gray-300 rounded-md bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 shadow-sm placeholder-gray-400 text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content Area -->
+<section class="w-full bg-gray-50 min-h-screen">
+    <div class="mx-auto max-w-7xl px-4 lg:px-8 py-8">
+
+        @if (loading) {
+        <!-- Standard Loading State (Double Spinner) -->
+        <!-- "Living Book" Loader -->
+        <div class="flex flex-col items-center justify-center py-20 min-h-[50vh]">
+            <app-loader message="Recherche dans les archives..."></app-loader>
+        </div>
+        } @else {
+        <!-- Sort & Count Info -->
+        <div class="flex items-center justify-between mb-6">
+            <div class="text-sm text-gray-500">
+                <span class="font-bold text-gray-900">{{ totalItems }}</span> documents trouvés
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Trier
+                    par</label>
+                <select (change)="handleSortChange($any($event.target).value)" [value]="sortBy"
+                    class="form-select-custom !py-1 !pl-3 !pr-8 text-sm !border-none !bg-transparent hover:text-green-600 focus:ring-0">
+                    <option value="title-asc">Titre (A-Z)</option>
+                    <option value="title-desc">Titre (Z-A)</option>
+                    <option value="author-asc">Auteur</option>
+                    <option value="year-desc">Plus récents</option>
+                    <option value="year-asc">Plus anciens</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Grille des résultats (Redesigned for better proportions) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mb-12" (contextmenu)="disableRightClick($event)">
+            @for (b of paginatedBooks; track b.key; let i = $index) {
+            <div
+                class="bg-white border border-gray-200 rounded-lg overflow-hidden flex flex-col hover:shadow-md transition-all duration-300 group"
+                appScrollAnimation 
+                animationType="fade-up" 
+                [animationDelay]="i * 50">
+                <!-- Card Image -->
+                <div class="relative aspect-[4/3] bg-gray-50 border-b border-gray-100 overflow-hidden h-48">
+                    @if (b.thumbnail_url) {
+                    <div class="relative w-full h-full group">
+                        <img [src]="b.thumbnail_url" [alt]="b.title" loading="lazy"
+                            class="w-full h-full object-cover cursor-pointer transition-transform duration-500 group-hover:scale-105 select-none pointer-events-none"
+                            draggable="false" (click)="openImagePopup(b.thumbnail_url, b.title)" />
+                        <!-- Protection overlay -->
+                        <div class="absolute inset-0 z-[10] cursor-pointer" (click)="openImagePopup(b.thumbnail_url, b.title)"></div>
+                    </div>
+                    } @else {
+                    <div class="w-full h-full flex items-center justify-center">
+                        <svg class="w-10 h-10 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                    </div>
+                    }
+                    @if (b.first_publish_year) {
+                    <div class="absolute top-2 left-2">
+                        <span
+                            class="px-1.5 py-0.5 bg-white/90 backdrop-blur text-[10px] font-bold text-gray-700 rounded shadow-sm border border-gray-100">
+                            {{ b.first_publish_year }}
+                        </span>
+                    </div>
+                    }
+                </div>
+
+                <!-- Card Body -->
+                <div class="p-4 flex flex-col flex-1">
+                    <h3 class="font-bold text-gray-900 text-sm leading-tight mb-1.5 line-clamp-2 min-h-[2.25rem]">
+                        {{ b.title | decodetitle }}
+                    </h3>
+
+                    @if (b.author_name?.length) {
+                    <p class="text-xs text-gray-500 font-medium mb-3 truncate italic">par {{ b.author_name[0] }}</p>
+                    }
+
+                    <!-- Actions -->
+                    <div class="mt-auto pt-3 flex items-center justify-between border-t border-gray-50">
+                        @if (b.original_url) {
+                        <a [routerLink]="isCollectionContext ? ['/collection', collectionName, slugify(b.title)] : ['/', getCollection(b), 'files', slugify(b.title)]"
+                            [queryParams]="{ f: encryptUrl(b.original_url), t: encryptUrl(b.title) }"
+                            class="text-xs font-bold text-green-600 hover:text-green-700 cursor-pointer flex items-center gap-1 transition-colors">
+                            Consulter
+                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                        } @else {
+                        <span class="text-[10px] text-gray-400 italic">Non disponible</span>
+                        }
+
+                        <button (click)="openDescriptionPopup(b)"
+                            class="text-[10px] font-semibold text-gray-400 hover:text-gray-600 cursor-pointer p-1 transition-colors">
+                            Détails
+                        </button>
+                    </div>
+                </div>
+            </div>
+            } @empty {
+            <div class="col-span-full text-center py-20 bg-white rounded-lg border border-gray-100">
+                <p class="text-gray-400 font-medium">Aucun résultat trouvé pour votre recherche.</p>
+            </div>
+            }
+        </div>
+
+        <!-- Pagination -->
+        @if (paginationVisible) {
+        <div class="flex flex-col items-center gap-4 py-8 border-t border-gray-200">
+            <div class="flex items-center gap-1">
+                <button (click)="goToPage(getCurrentPageFromUrl() - 1)" [disabled]="getCurrentPageFromUrl() === 1"
+                    class="p-2 text-gray-400 hover:text-green-600 disabled:opacity-30 cursor-pointer transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+
+                <div class="flex items-center gap-1 mx-4">
+                    <button (click)="goToPage(1)"
+                        [class]="getCurrentPageFromUrl() === 1 ? 'bg-green-500 text-white' : 'text-gray-600 hover:bg-gray-100'"
+                        class="w-8 h-8 flex items-center justify-center rounded-md text-sm font-bold transition-all cursor-pointer">
+                        1
+                    </button>
+
+                    @if (getCurrentPageFromUrl() > 3) { <span class="px-1 text-gray-300">...</span> }
+
+                    @if (getCurrentPageFromUrl() > 2) {
+                    <button (click)="goToPage(getCurrentPageFromUrl() - 1)"
+                        class="w-8 h-8 flex items-center justify-center rounded-md text-sm font-bold text-gray-600 hover:bg-gray-100 transition-all cursor-pointer">
+                        {{ getCurrentPageFromUrl() - 1 }}
+                    </button>
+                    }
+
+                    @if (getCurrentPageFromUrl() !== 1 && getCurrentPageFromUrl() !== totalPages) {
+                    <button
+                        class="w-8 h-8 flex items-center justify-center rounded-md text-sm font-bold bg-green-500 text-white shadow-sm cursor-default">
+                        {{ getCurrentPageFromUrl() }}
+                    </button>
+                    }
+
+                    @if (getCurrentPageFromUrl() < totalPages - 1) { <button
+                        (click)="goToPage(getCurrentPageFromUrl() + 1)"
+                        class="w-8 h-8 flex items-center justify-center rounded-md text-sm font-bold text-gray-600 hover:bg-gray-100 transition-all cursor-pointer">
+                        {{ getCurrentPageFromUrl() + 1 }}
+                        </button>
+                        }
+
+                        @if (getCurrentPageFromUrl() < totalPages - 2) { <span class="px-1 text-gray-300">...</span> }
+
+                            @if (totalPages > 1) {
+                            <button (click)="goToPage(totalPages)"
+                                [class]="getCurrentPageFromUrl() === totalPages ? 'bg-green-500 text-white' : 'text-gray-600 hover:bg-gray-100'"
+                                class="w-8 h-8 flex items-center justify-center rounded-md text-sm font-bold transition-all cursor-pointer">
+                                {{ totalPages }}
+                            </button>
+                            }
+                </div>
+
+                <button (click)="goToPage(getCurrentPageFromUrl() + 1)"
+                    [disabled]="getCurrentPageFromUrl() === totalPages"
+                    class="p-2 text-gray-400 hover:text-green-600 disabled:opacity-30 cursor-pointer transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        }
+        }
+    </div>
+</section>
+
+<!-- Popups (simplified for better UX and consistency) -->
+@if (showDescriptionPopup && selectedBook) {
+<div class="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+    (click)="closeDescriptionPopup()">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col"
+        (click)="$event.stopPropagation()">
+        <div class="p-6 border-b border-gray-100 flex justify-between items-start">
+            <h3 class="text-xl font-bold text-gray-900 leading-tight">{{ selectedBook.title | decodetitle }}</h3>
+            <button (click)="closeDescriptionPopup()" class="p-1 text-gray-400 hover:text-gray-600 cursor-pointer">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <div class="p-6 overflow-y-auto">
+            <div class="flex flex-wrap gap-4 mb-6">
+                @if (selectedBook.author_name?.length) {
+                <div>
+                    <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Auteur</span>
+                    <span class="text-sm font-semibold text-gray-800">{{ selectedBook.author_name[0] }}</span>
+                </div>
+                }
+                @if (selectedBook.first_publish_year) {
+                <div>
+                    <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Année</span>
+                    <span class="text-sm font-semibold text-gray-800">{{ selectedBook.first_publish_year }}</span>
+                </div>
+                }
+            </div>
+            <div>
+                <span
+                    class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Description</span>
+                <p class="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
+                    {{ getFullDescription(selectedBook) || 'Aucune description disponible.' }}
+                </p>
+            </div>
+        </div>
+        <div class="p-6 bg-gray-50 flex justify-end gap-3">
+            <button (click)="closeDescriptionPopup()"
+                class="px-6 py-2 rounded-lg font-bold text-gray-500 hover:bg-gray-100 cursor-pointer transition-colors">Fermer</button>
+            @if (selectedBook.original_url) {
+            <a [routerLink]="isCollectionContext ? ['/collection', collectionName, slugify(selectedBook.title)] : ['/', getCollection(selectedBook), 'files', slugify(selectedBook.title)]"
+                [queryParams]="{ f: encryptUrl(selectedBook.original_url), t: encryptUrl(selectedBook.title) }"
+                class="px-6 py-2 bg-green-500 text-white rounded-lg font-bold hover:bg-green-600 transition-colors shadow-sm cursor-pointer">
+                Consulter le document
+            </a>
+            }
+        </div>
+    </div>
+</div>
+}
+
+@if (showImagePopup && selectedImageUrl) {
+<div class="fixed inset-0 z-[70] bg-black/90 flex items-center justify-center p-4 cursor-pointer"
+    (click)="closeImagePopup()">
+    <button (click)="closeImagePopup()"
+        class="absolute top-6 right-6 text-white/50 hover:text-white transition-colors cursor-pointer z-[80]">
+        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+    </button>
+    <div class="relative" (click)="$event.stopPropagation()">
+        <!-- Image with protection overlay -->
+        <img [src]="selectedImageUrl" [alt]="selectedImageTitle" loading="lazy"
+            class="max-w-full max-h-full rounded-lg shadow-2xl transition-transform select-none pointer-events-none"
+            draggable="false" />
+        <!-- Transparent overlay to prevent saving -->
+        <div class="absolute inset-0 cursor-not-allowed z-[75]"></div>
+    </div>
+</div>
+}
