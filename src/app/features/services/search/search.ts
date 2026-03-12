@@ -116,14 +116,14 @@ export class SearchService {
     }
 
     if (params.title) {
-      httpParams = httpParams.set('property[0][property]', '1')
-        .set('property[0][type]', 'contains')
+      httpParams = httpParams.set('property[0][property]', 'dcterms:title')
+        .set('property[0][type]', 'in')
         .set('property[0][text]', params.title);
     }
 
     if (params.author) {
-      httpParams = httpParams.set('property[1][property]', '2')
-        .set('property[1][type]', 'contains')
+      httpParams = httpParams.set('property[1][property]', 'dcterms:creator')
+        .set('property[1][type]', 'in')
         .set('property[1][text]', params.author);
     }
 
@@ -136,9 +136,9 @@ export class SearchService {
         .filter((k: string) => k.length > 0);
 
       if (keywords.length > 0) {
-        // Rechercher le premier mot-clé dans la description (propriété 3) - garder la casse originale
-        httpParams = httpParams.set('property[2][property]', '3')
-          .set('property[2][type]', 'contains')
+        // Rechercher le premier mot-clé dans la description (propriété dcterms:description) - garder la casse originale
+        httpParams = httpParams.set('property[2][property]', 'dcterms:description')
+          .set('property[2][type]', 'in')
           .set('property[2][text]', keywords[0]);
       }
     }
@@ -181,14 +181,14 @@ export class SearchService {
     }
 
     if (params.title) {
-      httpParams = httpParams.set('property[0][property]', '1')
-        .set('property[0][type]', 'contains')
+      httpParams = httpParams.set('property[0][property]', 'dcterms:title')
+        .set('property[0][type]', 'in')
         .set('property[0][text]', params.title);
     }
 
     if (params.author) {
-      httpParams = httpParams.set('property[1][property]', '2')
-        .set('property[1][type]', 'contains')
+      httpParams = httpParams.set('property[1][property]', 'dcterms:creator')
+        .set('property[1][type]', 'in')
         .set('property[1][text]', params.author);
     }
 
@@ -205,9 +205,9 @@ export class SearchService {
       subjectKeywordsLower = originalKeywords.map((k: string) => k.toLowerCase());
 
       if (subjectKeywords.length > 0) {
-        // Rechercher le premier mot-clé dans la description (propriété 3) - garder la casse originale
-        httpParams = httpParams.set('property[2][property]', '3')
-          .set('property[2][type]', 'contains')
+        // Rechercher le premier mot-clé dans la description (propriété dcterms:description) - garder la casse originale
+        httpParams = httpParams.set('property[2][property]', 'dcterms:description')
+          .set('property[2][type]', 'in')
           .set('property[2][text]', subjectKeywords[0]);
       }
     }
