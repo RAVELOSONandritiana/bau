@@ -1,47 +1,46 @@
 pipeline {
-    agent any  // Utilise n'importe quel agent avec Node.js installé
+    agent any
     tools {
-        nodejs 'node22'  // correspond au nom que tu as donné
-    }
-
-    environment {
-        IMAGE_NAME = "192.168.1.183:5000/biblio_numerique-app"
-        IMAGE_TAG = "${env.BUILD_NUMBER}"
-        REGISTRY = "192.168.1.183:5000"
+        nodejs 'node22'
     }
 
     stages {
-        stage('Install dependencies') {
+        stage('Checkout') {
             steps {
-                // Installe les dépendances Node.js
+                // Récupère le code depuis le dépôt configuré dans le job Jenkins
+                checkout scm
+            }
+        }
+
+        stage('Build') {
+            steps {
+                // Installe les dépendances et build le projet
                 sh 'npm install'
+                sh 'npm run build'
             }
         }
 
-        stage('Build Angular Universal') {
-            steps {
-                // Build Angular Universal
-                sh 'npm run build:ssr'
-            }
-        }
-
-        stage('Archive build output') {
-            steps {
-                // Archive simplement le dossier dist pour le récupérer plus tard
-                archiveArtifacts artifacts: 'dist/**', fingerprint: true
-            }
-        }
-
-        stage('Deploy on server') {
+        stage('Copy Build to Home') {
             steps {
                 sshagent(['ssh-server-credentials']) {
-                    // Copie simplement les fichiers build sur le serveur via rsync ou scp
-                    sh """
-                    ssh -o StrictHostKeyChecking=no user@192.168.1.183 '
-                        mkdir -p /var/www/biblio_numerique
-                    '
-                    scp -r dist/* user@192.168.1.183:/var/www/biblio_numerique/
-                    """
+                    // Copie le dossier dist vers /home/bu
+                    sh '''
+                    scp -o StrictHostKeyChecking=no -r dist bu@192.168.1.183:/home/bu/
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy to /var/www') {
+            steps {
+                sshagent(['ssh-server-credentials']) {
+                    // Utilise le mot de passe sudo depuis le credential 'sudoer'
+                    withCredentials([string(credentialsId: 'sudoer', variable: 'SUDO_PASS')]) {
+                        // Fait ssh dans le serveur et copie le contenu de dist vers /var/www/
+                        sh '''
+                        ssh -o StrictHostKeyChecking=no bu@192.168.1.183 "echo $SUDO_PASS | sudo -S cp -r /home/bu/dist/* /var/www/"
+                        '''
+                    }
                 }
             }
         }
@@ -49,7 +48,7 @@ pipeline {
 
     post {
         success {
-            echo "Deployment terminé avec succès !"
+            echo "Déploiement terminé avec succès !"
         }
         failure {
             echo "Erreur lors du build ou déploiement."
