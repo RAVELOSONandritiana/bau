@@ -22,7 +22,8 @@ pipeline {
                     steps {
                         // Installe les dépendances et build le projet
                         sh 'npm install'
-                        sh 'npm run build --base-href /fonds-patrimoniaux/'
+                        // Le "--" indique à npm de passer les arguments suivants à la commande Angular (ng build)
+                        sh 'npm run build -- --base-href /fonds-patrimoniaux/'
                     }
                 }
 
