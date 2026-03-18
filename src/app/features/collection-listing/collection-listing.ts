@@ -203,6 +203,6 @@ export class CollectionListing implements OnInit {
   }
 
   selectCollection(value: string) {
-    this.router.navigate(['/collection', value]);
+    this.router.navigate(['/collection', value, 'result'], { queryParams: { limit: 6 } });
   }
 }
