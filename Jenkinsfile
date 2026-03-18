@@ -22,7 +22,7 @@ pipeline {
                     steps {
                         // Installe les dépendances et build le projet
                         sh 'npm install'
-                        sh 'npm run build --base-href /fonds-patrimoniaux/'
+                        sh 'ng build --base-href /fonds-patrimoniaux/'
                     }
                 }
 
