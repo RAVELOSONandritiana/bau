@@ -78,12 +78,13 @@ export class SearchService {
         .split(',')
         .map((k: string) => k.trim())
         .filter((k: string) => k.length > 0);
-      
-      // Si on a plusieurs mots-clés, récupérer plus de résultats pour compenser le filtrage AND
-      if (subjectKeywords.length > 1) {
-        // Récupérer assez de résultats pour avoir suffisamment de données après filtrage
-        perPage = Math.max(perPage * subjectKeywords.length * 2, 100);
-      }
+    }
+
+    // Récupérer BEAUCOUP plus de résultats si on filtre par mots-clés ou date (car le filtrage final est fait côté client)
+    if (subjectKeywords.length > 1 || params.yearStart || params.yearEnd) {
+      // On demande 500 items pour maximiser les chances de trouver des correspondances dans la collection
+      // Omeka S limite généralement à 50 ou 100, mais on tente le maximum possible
+      perPage = 500;
     }
 
     // Envoyer le nombre de livres par page dans les paramètres
@@ -115,16 +116,19 @@ export class SearchService {
       httpParams = httpParams.set('search', params.q);
     }
 
+    let propIdx = 0;
     if (params.title) {
-      httpParams = httpParams.set('property[0][property]', 'dcterms:title')
-        .set('property[0][type]', 'in')
-        .set('property[0][text]', params.title);
+      httpParams = httpParams.set(`property[${propIdx}][property]`, 'dcterms:title')
+        .set(`property[${propIdx}][type]`, 'in')
+        .set(`property[${propIdx}][text]`, params.title);
+      propIdx++;
     }
 
     if (params.author) {
-      httpParams = httpParams.set('property[1][property]', 'dcterms:creator')
-        .set('property[1][type]', 'in')
-        .set('property[1][text]', params.author);
+      httpParams = httpParams.set(`property[${propIdx}][property]`, 'dcterms:creator')
+        .set(`property[${propIdx}][type]`, 'in')
+        .set(`property[${propIdx}][text]`, params.author);
+      propIdx++;
     }
 
     // Gérer la recherche par mots-clés (subject) - sera traité côté client avec AND
@@ -137,11 +141,17 @@ export class SearchService {
 
       if (keywords.length > 0) {
         // Rechercher le premier mot-clé dans la description (propriété dcterms:description) - garder la casse originale
-        httpParams = httpParams.set('property[2][property]', 'dcterms:description')
-          .set('property[2][type]', 'in')
-          .set('property[2][text]', keywords[0]);
+        httpParams = httpParams.set(`property[${propIdx}][property]`, 'dcterms:description')
+          .set(`property[${propIdx}][type]`, 'in')
+          .set(`property[${propIdx}][text]`, keywords[0]);
+        propIdx++;
       }
     }
+
+    // NOTE: On ne filtre plus par date au niveau de l'API Omeka S car cela semble retourner 0 résultats 
+    // sur ce serveur spécifique. Le filtrage sera fait de manière robuste côté client dans searchItems.
+
+    console.log('Search total items params:', httpParams.toString());
 
     if (params.source && params.source !== 'all') {
       const sourceId = this.resolveSourceId(params.source);
@@ -180,16 +190,19 @@ export class SearchService {
       httpParams = httpParams.set('search', params.q);
     }
 
+    let propIdx = 0;
     if (params.title) {
-      httpParams = httpParams.set('property[0][property]', 'dcterms:title')
-        .set('property[0][type]', 'in')
-        .set('property[0][text]', params.title);
+      httpParams = httpParams.set(`property[${propIdx}][property]`, 'dcterms:title')
+        .set(`property[${propIdx}][type]`, 'in')
+        .set(`property[${propIdx}][text]`, params.title);
+      propIdx++;
     }
 
     if (params.author) {
-      httpParams = httpParams.set('property[1][property]', 'dcterms:creator')
-        .set('property[1][type]', 'in')
-        .set('property[1][text]', params.author);
+      httpParams = httpParams.set(`property[${propIdx}][property]`, 'dcterms:creator')
+        .set(`property[${propIdx}][type]`, 'in')
+        .set(`property[${propIdx}][text]`, params.author);
+      propIdx++;
     }
 
     // Parser les mots-clés une seule fois: séparer par virgule, trim, et filtrer les vides
@@ -206,11 +219,23 @@ export class SearchService {
 
       if (subjectKeywords.length > 0) {
         // Rechercher le premier mot-clé dans la description (propriété dcterms:description) - garder la casse originale
-        httpParams = httpParams.set('property[2][property]', 'dcterms:description')
-          .set('property[2][type]', 'in')
-          .set('property[2][text]', subjectKeywords[0]);
+        httpParams = httpParams.set(`property[${propIdx}][property]`, 'dcterms:description')
+          .set(`property[${propIdx}][type]`, 'in')
+          .set(`property[${propIdx}][text]`, subjectKeywords[0]);
+        propIdx++;
       }
     }
+
+    // NOTE: On ne filtre plus par date au niveau de l'API Omeka S car cela semble retourner 0 résultats 
+    // sur ce serveur spécifique. Le filtrage robuste est fait plus bas dans le pipe(map(...)).
+    
+    // S'assurer que le premier filtre a aussi un joiner si nécessaire
+    // (certaines versions d'Omeka S le préfèrent)
+    if (propIdx > 0) {
+        httpParams = httpParams.set('property[0][joiner]', 'and');
+    }
+
+    console.log('Search items request params:', httpParams.toString());
 
     if (params.source && params.source !== 'all') {
       const sourceId = this.resolveSourceId(params.source);
@@ -312,18 +337,22 @@ export class SearchService {
               console.log('Total docs after filter:', filteredDocs.length);
             }
 
-            if (params.yearStart) {
-              const yearStart = parseInt(params.yearStart);
-              filteredDocs = filteredDocs.filter((doc: any) =>
-                doc.first_publish_year !== null && doc.first_publish_year >= yearStart
-              );
-            }
+            // Filtrage LOCAL par dates (FALLBACK) - très important si l'API ignore les filtres
+            const yearStart = params.yearStart ? parseInt(params.yearStart) : null;
+            const yearEnd = params.yearEnd ? parseInt(params.yearEnd) : null;
 
-            if (params.yearEnd) {
-              const yearEnd = parseInt(params.yearEnd);
-              filteredDocs = filteredDocs.filter((doc: any) =>
-                doc.first_publish_year !== null && doc.first_publish_year <= yearEnd
-              );
+            if (yearStart !== null || yearEnd !== null) {
+              console.log('Applying local date filter fallback:', { yearStart, yearEnd });
+              filteredDocs = filteredDocs.filter((doc: any) => {
+                if (doc.first_publish_year === null) return false;
+                
+                let matches = true;
+                if (yearStart !== null && doc.first_publish_year < yearStart) matches = false;
+                if (yearEnd !== null && doc.first_publish_year > yearEnd) matches = false;
+                
+                return matches;
+              });
+              console.log('Total docs after local date filter:', filteredDocs.length);
             }
 
             return {
@@ -352,10 +381,10 @@ export class SearchService {
 
   private resolveSourceId(source: string): string {
     const mapping: { [key: string]: string } = {
-      'Livres': '66',
-      'P.A.MA.L': '67',
-      'BUTANA': '558',
-      'fonds-grandidier': '31231',
+      'Livres': '4',
+      'P.A.MA.L': '2',
+      'BUTANA': '3',
+      'fonds-grandidier': '1',
     };
     // Retourne l'ID si trouvé, sinon retourne la source telle quelle (au cas où c'est déjà un ID)
     return mapping[source] || source;
