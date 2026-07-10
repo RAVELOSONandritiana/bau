@@ -2,7 +2,7 @@
 import { Component, OnInit, inject, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { CollectionService } from '../services/collection.service';
+import { Collection, CollectionService } from '../services/collection.service';
 import { SearchService } from '../services/search/search';
 import { forkJoin } from 'rxjs';
 import { HeaderComponent } from '../../components/header/header';
@@ -50,7 +50,7 @@ import { ScrollAnimationDirective } from '../../directives/scroll-animation.dire
           <!-- Grid -->
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div *ngFor="let collection of collections; let i = index" 
-                 (click)="selectCollection(collection.value)"
+                 (click)="selectCollection(collection)"
                  class="group relative bg-white rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.12)] transition-all duration-500 cursor-pointer overflow-hidden border border-gray-100/80 transform hover:-translate-y-2 flex flex-col items-stretch h-full"
                  appScrollAnimation 
                  animationType="fade-up" 
@@ -84,7 +84,7 @@ import { ScrollAnimationDirective } from '../../directives/scroll-animation.dire
                 
                 <div class="mt-auto flex items-center justify-between">
                   <span class="text-sm font-semibold text-green-600 group-hover:translate-x-1 transition-transform inline-flex items-center gap-2">
-                    Découvrir la collection
+                    {{ collection.isExternal ? 'Visiter le portail' : 'Découvrir la collection' }}
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
@@ -202,7 +202,12 @@ export class CollectionListing implements OnInit {
     });
   }
 
-  selectCollection(value: string) {
-    this.router.navigate(['/collection', value, 'result'], { queryParams: { limit: 6 } });
+  selectCollection(collection: Collection) {
+    if (collection.isExternal && collection.link) {
+      window.open(collection.link, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    this.router.navigate(['/collection', collection.value, 'result'], { queryParams: { limit: 6 } });
   }
 }

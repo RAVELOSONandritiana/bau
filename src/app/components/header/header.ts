@@ -35,6 +35,10 @@ import { RouterModule, Router } from '@angular/router';
              class="text-sm font-semibold text-gray-600 hover:text-green-600 transition-all border-b-2 border-transparent py-1 cursor-pointer">
             Collections
           </a>
+          <a [href]="thesesUrl" target="_blank" rel="noopener noreferrer"
+             class="text-sm font-semibold text-gray-600 hover:text-green-600 transition-all border-b-2 border-transparent py-1 cursor-pointer">
+            Thèses
+          </a>
           <a routerLink="/help" routerLinkActive="text-green-600 border-green-600"
              class="text-sm font-semibold text-gray-600 hover:text-green-600 transition-all border-b-2 border-transparent py-1 cursor-pointer">
             Aide
@@ -65,6 +69,10 @@ import { RouterModule, Router } from '@angular/router';
              class="text-base font-medium text-gray-600 hover:text-green-600 hover:bg-green-50 px-4 py-2 rounded-xl transition-all">
             Collections
           </a>
+          <a [href]="thesesUrl" target="_blank" rel="noopener noreferrer" (click)="isMenuOpen = false"
+             class="text-base font-medium text-gray-600 hover:text-green-600 hover:bg-green-50 px-4 py-2 rounded-xl transition-all">
+            Thèses
+          </a>
           <a routerLink="/help" (click)="isMenuOpen = false" routerLinkActive="text-green-600 bg-green-50"
              class="text-base font-medium text-gray-600 hover:text-green-600 hover:bg-green-50 px-4 py-2 rounded-xl transition-all">
             Aide
@@ -85,5 +93,6 @@ import { RouterModule, Router } from '@angular/router';
 })
 export class HeaderComponent {
     isMenuOpen = false;
+    thesesUrl = 'https://biblio.univ-antananarivo.mg/theses';
     private router = inject(Router);
 }

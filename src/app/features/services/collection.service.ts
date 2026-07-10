@@ -9,6 +9,8 @@ export interface Collection {
     color?: string;
     image?: string; // Optional image for the card
     count?: number; // Live book count
+    link?: string; // External destination for the collection
+    isExternal?: boolean; // Whether the card should open an external website
 }
 
 @Injectable({
@@ -52,6 +54,17 @@ export class CollectionService {
             color: 'bg-green-700',
             image: '0b4d6acfa119a2c602badbb8f3de84ad9a19477b.jpg',
             count: 0
+        },
+        {
+            value: 'theses',
+            label: 'Thèses',
+            description: 'Découvrez les thèses de l’Université d’Antananarivo sur un portail dédié et enrichi.',
+            theme: 'violet',
+            color: 'bg-violet-600',
+            image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80',
+            count: 0,
+            isExternal: true,
+            link: 'https://biblio.univ-antananarivo.mg/theses'
         }
     ];
 
