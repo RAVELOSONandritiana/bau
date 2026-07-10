@@ -61,7 +61,7 @@ export class CollectionService {
             description: 'Découvrez les thèses de l’Université d’Antananarivo sur un portail dédié et enrichi.',
             theme: 'violet',
             color: 'bg-violet-600',
-            image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80',
+            image: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&w=1200&q=80',
             count: 0,
             isExternal: true,
             link: 'https://biblio.univ-antananarivo.mg/theses'
