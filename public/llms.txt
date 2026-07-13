@@ -1,91 +1,255 @@
 # Bibliothèque Numérique (Projet « Didier »)
 
-> Plateforme web Angular de consultation et de recherche documentaire pour la Bibliothèque et Archives Universitaires (BAU) de l'Université d'Antananarivo, Madagascar. Elle expose les fonds patrimoniaux (livres, périodiques, thèses, fonds historique) via l'API Omeka S et propose une recherche avancée, une pagination, un visualiseur de documents PDF et une interface multilingue (français).
+> Plateforme web Angular de consultation et de recherche documentaire pour la Bibliothèque et Archives Universitaires (BAU) de l'Université d'Antananarivo, Madagascar. Elle expose les fonds patrimoniaux (livres, périodiques anciens, thèses, fonds historiques) via l'API Omeka S et propose une recherche avancée, une pagination, un visualiseur de documents PDF sécurisé et une interface en français.
 
 ## Aperçu technique
 
-- **Framework** : Angular 20 (standalone components, routing, reactive forms).
-- **Langage** : TypeScript, HTML, CSS (Tailwind CSS + styles globaux).
+- **Framework** : Angular 20 (standalone components, nouvelles APIs de control flow `@if`/`@for`, reactive forms, Angular Router).
+- **Langage** : TypeScript, HTML, CSS.
+- **Styles** : Tailwind CSS (utilitaires) + `src/styles.css` (styles globaux, classes `.form-select-custom`, `.line-clamp-*`).
 - **Cible de build** : application Angular autonome (`@angular/build:application`), bundle généré dans `dist/`.
-- **Environnement** : les URLs de base proviennent de `src/environments/environment.ts` (`production: false` en dev, remplacé par `environment.prod.ts` en production).
+- **Environnement** : les URLs de base proviennent de `src/environments/environment.ts` (`production: false` en dev, remplacé par `environment.prod.ts` en production). Champs : `production`, `copyright` (ex. `2026`), `url` = `https://biblio.univ-antananarivo.mg/omeka`.
 - **Fichiers statiques** : tout le contenu de `public/` est copié à la racine du site (images, favicon, worker PDF). Ce fichier `llms.txt` est donc servi à `https://<domaine>/llms.txt`.
+
+## Architecture des dossiers (src/app)
+
+- `components/header/` — en-tête global (`app-header`) avec logo, navigation desktop/mobile, liens BAU et Thèses.
+- `components/footer/` — pied de page (`app-footer`) avec contact, liens rapides, copyright (depuis `environment.copyright`).
+- `components/loader/` — indicateur de chargement réutilisable (`app-loader`, message paramétrable).
+- `directives/scroll-animation.directive.ts` — directive `appScrollAnimation` (types : `fade-up`, délai via `[animationDelay]`) pour les animations au scroll.
+- `layout/main-layout/` — `MainLayout` : `<router-outlet>` + `<app-footer>` ; conteneur des pages d'accueil et d'aide.
+- `features/home/` — page d'accueil (hero, statistiques, fonctionnalités, mission, CTA).
+- `features/search/` — formulaire de recherche avancée (global ou restreint à une collection).
+- `features/result/` — résultats de recherche paginés + tri + filtre + popups détails/image.
+- `features/omeka/` — vue complète d'un fonds Omeka (`/omeka/:collection`).
+- `features/file-viewer/` — visualiseur PDF sécurisé (`PdfSafeViewer` chargé dynamiquement).
+- `features/collection-listing/` — liste des collections avec compteur de documents en direct.
+- `features/help/` — centre d'aide (guide de recherche, FAQ, conseils, contact).
+- `features/not-found/` — page 404.
+- `features/services/` — `collection.service.ts` (définition des collections), `search/search.ts` (appels API Omeka, mapping, filtrage).
+- `features/pipes/` — `decodetitle` (`DecodetitlePipe`), `formatNumber` (`FormatNumberPipe`).
 
 ## Fonctionnalités principales
 
-- Page d'accueil présentant les collections patrimoniales (cartes avec compteur de documents en direct).
-- Liste des collections (`/collection`) avec comptage dynamique des documents via l'API.
-- Recherche avancée (`/search` et `/collection/:collection`) : champ libre, titre, auteur, mots-clés (séparés par virgules, logique AND), source, et nombre de résultats par page. (Les champs de plage d'années « Début / Fin » existent dans le code mais sont actuellement commentés dans `search.html`.)
-- Résultats de recherche (`/result`, `/collection/:collection/result`) : liste paginée, tri (titre, auteur, année), filtrage côté client, popups de description, pagination par URL.
-- Vue de collection Omeka (`/omeka/:collection`) : parcours complet d'un fonds avec pagination, filtrage et tri.
-- Visualiseur de fichiers (`/collection/:collection/:title`, `/:collection/files/:title`) : affichage/lecture de documents (PDF) via `pdf.worker.min.mjs` et `sessionStorage`.
-- Page d'aide (`/help`).
-- Page 404 (`**`).
-- En-tête (`header`) et pied de page (`footer`) contenant des liens vers le site institutionnel BAU et le portail des thèses.
+- **Page d'accueil** (`/`) : hero, section statistiques (4 cartes animées), 4 cartes « Ce que nous proposons » (Recherche avancée, Collection riche, Consultation en ligne, Patrimoine culturel), section « Notre mission », CTA vers `/collection`.
+- **Liste des collections** (`/collection`) : cartes par collection avec image, badge de compteur de documents (récupéré en direct via API), accès à la collection ou ouverture d'un portail externe (Thèses).
+- **Recherche avancée** (`/search`, `/collection/:collection`) : champ libre `q`, `title`, `author`, `subject` (mots-clés séparés par virgules, logique AND), sélection de la `source` (base), et nombre de résultats par page (`limit`). (Les champs de plage d'années « Année : Début → Fin » existent dans le code — `formControlName="yearStart"` / `yearEnd` — mais sont actuellement commentés dans `search.html`.)
+- **Résultats** (`/result`, `/collection/:collection/result`) : grille de cartes (vignette, titre décodé, auteur, année), barre de filtre rapide (titre/description/auteur), menu « Trier par » (titre A-Z, titre Z-A, auteur, plus récents, plus anciens), pagination par URL, popup détails et popup image.
+- **Vue Omeka** (`/omeka/:collection`) : parcours d'un fonds complet, filtrage par titre/description/auteur/année, tri, pagination, popup description.
+- **Visualiseur de fichiers** (`/collection/:collection/:title`, `/:collection/files/:title`) : affichage/lecture de documents (PDF) via `PdfSafeViewer` (import dynamique de `pdf-safe-viewer`), zoom +/-, reset, barre de progression, protection.
+- **Centre d'aide** (`/help`) : guide de recherche, guide de résultats, FAQ (accès aux documents, téléchargement, collections, signalement d'erreur), conseils, bloc contact.
+- **Page 404** (`**`) : route de repli.
 
 ## Routes de l'application (Angular Router)
 
-- `/` → `MainLayout` (accueil + enfants `HomeComponent`, `Help`).
-- `/help` → page d'aide.
+- `/` → `MainLayout` (enfants : `HomeComponent` `/`, `Help` `/help`).
+- `/help` → centre d'aide.
 - `/search` → formulaire de recherche avancée global.
 - `/result` → résultats de recherche globale.
-- `/collection` → `CollectionListing` (liste des collections).
-- `/collection/:collection` → recherche restreinte à une collection.
+- `/collection` → `CollectionListing` (lazy-loaded).
+- `/collection/:collection` → recherche restreinte à une collection (hérite du composant `Search`).
 - `/collection/:collection/result` → résultats restreints à une collection.
 - `/collection/:collection/:title` → visualiseur de document.
-- `/omeka/:collection` → vue Omeka d'un fonds.
+- `/omeka/:collection` → vue Omeka d'un fonds (recharge sur changement de params/query).
 - `/:collection/files/:title` → visualiseur de document (route alternative).
 - `**` → page non trouvée (`NotFound`).
 
+## Flux utilisateur (navigation)
+
+1. Accueil → « Explorer la collection » ou « Commencer la recherche » → `/collection` ou `/search`.
+2. Recherche avancée → soumission (`onSubmit`) → navigation vers `/result` (ou `./result` en contexte collection) avec `queryParams` nettoyés (valeurs vides supprimées).
+3. Résultats → « Consulter » sur une carte → `/collection/:collection/:title` (ou `/:collection/files/:title`) avec `queryParams` `{ f: encryptUrl(original_url), t: encryptUrl(title) }`.
+4. Visualiseur → lecture PDF, zoom, retour (`goBack` / `window.history.back()`).
+5. Réinitialisation du formulaire via le bouton « Réinitialiser » (`reset()`).
+
 ## URLs et endpoints clés
 
-- **Site institutionnel BAU** : https://biblio.univ-antananarivo.mg
-  - Lien ajouté dans l'en-tête et le pied de page (texte / `aria-label` : « Bibliothèque et Archive Universitaire d'Antananarivo »).
-- **Portail des thèses et mémoires** : https://biblio.univ-antananarivo.mg/theses
-  - Lien « Thèses et mémoire » dans l'en-tête et le pied de page ; ouvre une nouvelle fenêtre (`target="_blank"`, `rel="noopener noreferrer"`). La collection « Thèses » est marquée `isExternal` et redirige vers ce portail.
+- **Site institutionnel BAU** : https://biblio.univ-antananarivo.mg — lien ajouté dans l'en-tête et le pied de page (texte / `aria-label` : « Bibliothèque et Archive Universitaire d'Antananarivo »).
+- **Portail des thèses et mémoires** : https://biblio.univ-antananarivo.mg/theses — lien « Thèses et mémoire » dans l'en-tête et le pied de page ; ouvre une nouvelle fenêtre (`target="_blank"`, `rel="noopener noreferrer"`). La collection « Thèses » est `isExternal` et redirige vers ce portail.
 - **API Omeka S (base)** : https://biblio.univ-antananarivo.mg/omeka
-  - `GET {base}/api/items` : recherche d'items (paramètres `search`, `property[...]`, `item_set_id`, `page`, `per_page`). Le total est lu dans l'en-tête `Omeka-S-Total-Results`.
-  - `GET {base}/api/media/{id}` : métadonnées d'un média (URL d'origine `o:original_url`, vignettes `o:thumbnail_urls`).
-- **URLs historiques** : l'API renvoie parfois l'ancienne adresse IP `https://192.168.1.183` ; elle est systématiquement réécrite en `https://biblio.univ-antananarivo.mg/omeka` côté client (`transformUrls` dans `search.service.ts`).
+  - `GET {base}/api/items` : recherche d'items. Paramètres : `search` (q), `property[][property|type|text]` (dcterms:title, dcterms:creator, dcterms:description), `property[0][joiner]=and`, `item_set_id`, `page`, `per_page`. Le total est lu dans l'en-tête `Omeka-S-Total-Results`.
+  - `GET {base}/api/media/{id}` : métadonnées d'un média (`o:original_url`, `o:thumbnail_urls` : large/medium/square).
+- **URLs historiques** : l'API renvoie parfois l'ancienne adresse IP `https://192.168.1.183` ; elle est systématiquement réécrite en `https://biblio.univ-antananarivo.mg/omeka` côté client (`transformUrls` dans `search.service.ts` et `decryptUrl` dans `file-viewer.ts`).
 - **Proxy de développement** (`proxy.conf.json`, uniquement en `ng serve`) :
   - `/api` → `http://localhost:3000`
   - `/files` → `http://192.168.1.183`
 
 ## Mapping des collections (item_set_id Omeka S)
 
-Utilisé par `resolveSourceId` pour traduire le nom de collection en identifiant d'item set :
+Utilisé par `resolveSourceId` (`search.service.ts`) pour traduire le nom de collection en identifiant d'item set :
 
 - `Livres` → `4`
-- `P.A.MA.L` (Périodiques Anciens) → `2`
-- `BUTANA` (fonds bibliothèque universitaire) → `3`
+- `P.A.MA.L` (Périodiques Anciens de la BAU) → `2`
+- `BUTANA` (Bibliothèque Universitaire d'Antananarivo) → `3`
 - `fonds-grandidier` (histoire et culture malgache) → `1`
-- `theses` → collection externe (`isExternal: true`), ouvre https://biblio.univ-antananarivo.mg/theses
+- `theses` → collection externe (`isExternal: true`), ouvre https://biblio.univ-antananarivo.mg/theses (pas d'`item_set_id`).
+
+Définition des collections dans `collection.service.ts` (valeurs : `value`, `label`, `description`, `theme`, `color`, `image`, `count`, `link`, `isExternal`).
+
+## Modèle de données d'un document (« doc »)
+
+Objet normalisé retourné par `searchItems` (`search.service.ts`) et consommé par les vues :
+
+- `key` : identifiant Omeka `o:id` (string).
+- `title` : `o:title` (ou « Sans titre »).
+- `author_name` : tableau des `dcterms:creator` (`@value`).
+- `first_publish_year` : année extraite de `dcterms:date` via regex `\d{4}` (ou `null`).
+- `description` : `dcterms:description` (`@value`) ou `null`.
+- `subject` : tableau des `dcterms:subject` (`@value`).
+- `thumbnail_url` : vignette (`large` puis `medium`) du média, ou `null`.
+- `original_url` : URL d'origine du fichier (`o:original_url`), ou `null`.
 
 ## Paramètres de recherche supportés (service SearchService)
 
 - `q` : recherche plein texte (`search`).
 - `title` : filtre sur `dcterms:title` (type `in`).
 - `author` : filtre sur `dcterms:creator` (type `in`).
-- `subject` : mots-clés séparés par virgules, filtrés en logique AND côté client sur description + sujets.
-- `source` : nom de collection (résolu en `item_set_id`) ou `* / all` pour tout.
-- `limit` / `per_page` : nombre de résultats par page.
-- `page` : pagination.
-- `yearStart` / `yearEnd` : plage d'années (filtrage local de secours ; voir note de commentaire dans le formulaire).
+- `subject` : mots-clés séparés par virgules, filtrés en logique **AND** côté client sur description + sujets.
+- `source` : nom de collection (résolu en `item_set_id`) ou `all` / `*` pour tout.
+- `limit` / `per_page` : nombre de résultats par page (defaut formulaire : `6` ; valeurs proposées : `6, 9, 12, 18, 24, 48`).
+- `page` : pagination (base 1).
+- `yearStart` / `yearEnd` : plage d'années (filtrage local de secours ; voir note de commentaire dans le formulaire). Quand présents (avec `subject` multiple), la requête demande jusqu'à `per_page=500` pour maximiser les correspondances avant filtrage client.
+- Paramètres de visualiseur : `f` = `encryptUrl(original_url)` (base64), `t` = `encryptUrl(title)`.
+- Paramètres SEO/UI dans l'URL : `filterCriteria` (title|description|author), `filterValue`, `bookId`, `bookDescription`.
 
-## Recherche et pagination
+## Recherche, tri, filtrage et pagination
 
-- La pagination est pilotée par l'URL (`queryParams` : `page`, `filterCriteria`, `filterValue`, `limit`, `source`).
-- Le filtrage (titre, description, auteur, année) et le tri (titre, auteur, année, asc/desc) sont effectués côté client après récupération des items.
-- Les descriptions de documents sont parfois injectées dans l'URL (`bookId`, `bookDescription`) pour le SEO sans rechargement (`window.history.replaceState`).
+- **Tri** (`sortBy`) : `title-asc`, `title-desc`, `author-asc`, `year-desc`, `year-asc` (implémenté dans `Omeka.sortBooks` et `Result`).
+- **Filtre rapide** (`filterCriteria`) : `title`, `description`, `author` (et `year` dans la vue Omeka). Filtrage insensible à la casse côté client, avec debounce de 500 ms (`onFilterChange`).
+- **Pagination** : pilotée par l'URL (`queryParams` : `page`, `filterCriteria`, `filterValue`, `limit`, `source`). Composant `Omeka` : `itemsPerPage = 10` par défaut, plage de pages avec `...` (`getPaginationRange`), navigation sans rechargement (`window.history.replaceState`, `updateUrlWithoutReload`).
+- **Total des résultats** : prioritairement l'en-tête `Omeka-S-Total-Results` ; sinon estimation (si `items.length === perPage` → x2, sinon `(page-1)*perPage + items.length`).
+- **Descriptions pour SEO** : injectées dans l'URL (`bookId`, `bookDescription`) via `history.replaceState` sans rechargement de page, retirées à la fermeture de la popup.
 
-## Sécurité / comportements UI
+## Pipes
 
-- Désactivation du clic droit et de certains raccourcis développeur (F12, Ctrl+Shift+I/J/C, Ctrl+U) via `HostListener` dans `CollectionListing`.
-- Les liens externes utilisent `rel="noopener noreferrer"`.
-- Les URLs de documents PDF sont encodées en base64 (`btoa`/`atob`) puis transmises au visualiseur via `sessionStorage`.
+- `decodetitle` (`DecodetitlePipe`) : décode les entités HTML/titres encodés pour l'affichage (utilisé sur les titres de cartes et popups).
+- `formatNumber` (`FormatNumberPipe`) : formate les valeurs numériques des statistiques (ex. séparateur de milliers).
+
+## Sécurité, protection des documents et comportements UI
+
+- **Visualiseur sécurisé (`PdfSafeViewer`)** : chargé dynamiquement, affiche le PDF via `pdf.worker.min.mjs` (présent dans `public/`) ; barre de progression de chargement.
+- **Désactivation du clic droit** : `contextmenu` prévenu (`preventDefault`) sur les pages Résultats, Collection, et dans le `FileViewer` (au niveau document + fenêtre, capture phase).
+- **Raccourcis développeur désactivés** : `F12`, `Ctrl+Shift+I/J/C`, `Ctrl+U` (et `Ctrl/Cmd+P/S/U` dans le visualiseur) via `HostListener` sur `CollectionListing`, `Search`, `Omeka`, `FileViewer`.
+- **Anti-sélection / anti-téléchargement** : overlays transparents (`pointer-events-none`, `select-none`, `draggable="false"`) sur vignettes et images en plein écran pour empêcher la sauvegarde. FAQ : la plateforme est « optimisée pour la consultation en ligne », pas le téléchargement.
+- **Liens externes** : `rel="noopener noreferrer"` + `target="_blank"`.
+- **URLs de documents** : encodées en base64 (`btoa`/`atob`) puis transmises au visualiseur via `sessionStorage` (`storePdfData`) ou `queryParams` (`encryptUrl`/`decryptUrl`).
+- **SSR-safe** : utilisation de `isPlatformBrowser(PLATFORM_ID)` pour ne charger les données / manipuler `window` que côté navigateur.
+
+## Contact (pied de page)
+
+- **E-mail** : bu@univ-antananarivo.mg
+- **Téléphone** : +261 34 41 057 29 / +261 34 66 301 73
+- **Adresse** : Bibliothèque et Archive Universitaire, Antananarivo, Madagascar
+
+## Contenu et médias
+
+- Images de couverture des collections : principalement depuis Unsplash (`images.unsplash.com`) ; le `fonds-grandidier` utilise une image locale `0b4d6acfa119a2c602badbb8f3de84ad9a19477b.jpg` (présente dans `public/`).
+- Favicon : `public/favicon.ico` ; icône PDF : `public/acrobat.svg`.
+- Loader : `<app-loader [message]="...">` (ex. « Chargement des collections... », « Recherche dans les archives... »).
+
+## Limites / points d'attention
+
+- Le filtrage par date n'est **plus** appliqué côté API Omeka S (retournait 0 résultat sur ce serveur) ; un filtrage local de secours existe dans `searchItems`. Les champs année du formulaire sont commentés.
+- Le total de pagination peut être une estimation quand l'en-tête `Omeka-S-Total-Results` est absent.
+- Le visualiseur repose sur le chargement dynamique de `pdf-safe-viewer` (navigateur uniquement).
+- Les `limits` proposés dans le formulaire (`[6, 9, 12, 18, 24, 48]`) diffèrent du texte d'aide (« 10, 20, 30, 40, 50 ») — le code reste la source de vérité.
 
 ## Développement
 
-- `ng serve` → serveur de dev sur http://localhost:4200/ (avec proxy défini dans `proxy.conf.json`).
-- `ng build` → build de production dans `dist/`.
+- `ng serve` → serveur de dev sur http://localhost:4200/ (avec proxy `proxy.conf.json`).
+- `ng build` → build de production dans `dist/` (budgets : initial max 1 MB, component style max 8 kB).
 - `ng test` → tests unitaires (Karma).
 - Nom interne du projet Angular : `didier`.
+- `public/llms.txt` (ce fichier) est copié à la racine de `dist/` et servi à `/llms.txt`.
+
+## Liens externes, identité de marque et navigation hors-site
+
+La plateforme fait partie de l'écosystème numérique de l'**Université d'Antananarivo** (domaine principal `univ-antananarivo.mg`). La bibliothèque y est rattachée via le sous-domaine `biblio.univ-antananarivo.mg`.
+
+### Liens présents dans l'en-tête (`app-header`)
+
+- **Logo + titre** : « Bibliothèque Numérique » avec le slogan « Patrimoine Malgache » ; le logo renvoie à l'accueil (`routerLink="/"`).
+- **Navigation principale** (desktop et mobile) :
+  - `Accueil` → `/`
+  - `Collections` → `/collection`
+  - `Thèses et mémoire` → `https://biblio.univ-antananarivo.mg/theses` (lien externe, `target="_blank"`, `rel="noopener noreferrer"`, `aria-label="Thèses et mémoire"`)
+  - `Bibliothèque et Archive Universitaire d'Antananarivo` → `https://biblio.univ-antananarivo.mg` (lien externe, `aria-label="Bibliothèque et Archive Universitaire d'Antananarivo"`)
+  - `Aide` → `/help`
+- Les liens externes (`theses` et site BAU) utilisent la propriété `biblioUrl` (`https://biblio.univ-antananarivo.mg`) et `thesesUrl` (`https://biblio.univ-antananarivo.mg/theses`) définies dans `HeaderComponent`.
+
+### Liens présents dans le pied de page (`app-footer`)
+
+- **Logo + slogan** : « Bibliothèque Numérique » / « Patrimoine Malgache ».
+- **Contactez-nous** : e-mail `bu@univ-antananarivo.mg` (domaine `univ-antananarivo.mg`), téléphones, adresse « Bibliothèque et Archive Universitaire, Antananarivo, Madagascar ».
+- **Liens rapides** : `Accueil` (`/`), `Collections` (`/collection`), `Thèses et mémoire` (`https://biblio.univ-antananarivo.mg/theses`, `aria-label="Thèses et mémoire"`), `Aide` (`/`), et le lien « Bibliothèque et Archive Universitaire d'Antananarivo » (`https://biblio.univ-antananarivo.mg`, `aria-label="Bibliothèque et Archive Universitaire d'Antananarivo"`).
+- **Copyright** : « © {environment.copyright} Bibliothèque Numérique. Tous droits réservés. »
+
+### Lien « Thèses et mémoire » et portail des thèses
+
+- URL : `https://biblio.univ-antananarivo.mg/theses`
+- Présent à la fois dans l'en-tête et le pied de page (texte « Thèses et mémoire », `aria-label` identique).
+- La **collection « Thèses »** (`collection.service.ts`) est marquée `isExternal: true` avec `link: 'https://biblio.univ-antananarivo.mg/theses'` : depuis la liste des collections, cliquer sur la carte Thèses ouvre ce portail dans un nouvel onglet (`window.open(link, '_blank', 'noopener,noreferrer')`) au lieu de naviguer dans l'app.
+- Ce portail est un site dédié et enrichi pour les thèses et mémoires de l'Université d'Antananarivo ; il n'est pas alimenté par l'API Omeka S de cette application.
+
+### Domaines et sous-domaines (récapitulatif)
+
+- `univ-antananarivo.mg` : domaine principal de l'Université d'Antananarivo (utilisé pour l'e-mail institutionnel `bu@univ-antananarivo.mg`).
+- `biblio.univ-antananarivo.mg` : site web de la Bibliothèque et Archives Universitaires (BAU) ; héberge aussi l'API Omeka S sous `/omeka`.
+- `biblio.univ-antananarivo.mg/theses` : portail des thèses et mémoire (lien externe « Thèses et mémoire »).
+- `biblio.univ-antananarivo.mg/omeka/api/items` et `/api/media/{id}` : endpoints de l'API Omeka S consommée par l'application.
+- `192.168.1.183` (et `https://192.168.1.183`) : ancienne adresse IP interne parfois renvoyée par l'API ; réécrite automatiquement en `https://biblio.univ-antananarivo.mg/omeka` côté client.
+
+## Glossaire
+
+- **BAU** : Bibliothèque et Archives Universitaires de l'Université d'Antananarivo.
+- **Omeka S** : système de gestion de bibliothèque numérique ;
+- **item_set_id** : identifiant Omeka S d'un ensemble de documents (une « collection »).
+- **P.A.MA.L** : Périodiques Anciens déposés à la BAU.
+- **BUTANA** : Bibliothèque Universitaire d'Antananarivo.
+- **Fonds Grandidier** : collection de référence sur l'histoire et la culture malgache.
+- **doc** : objet document normalisé retourné par `SearchService` et affiché dans les résultats.
+- **llms.txt** : fichier de métadonnées destiné aux modèles d'IA (ce fichier), servi à la racine du site.
+
+## États de chargement et gestion d'erreurs
+
+- **Chargement** : `<app-loader>` avec message contextuel (« Chargement des collections... » sur la liste, « Recherche dans les archives... » sur les résultats). Le compteur de documents des collections est récupéré en parallèle via `forkJoin` (`fetchCollectionCounts`) et `getTotalItems`.
+- **Aucun résultat** : message « Aucun résultat trouvé pour votre recherche. » (état `@empty` de la grille).
+- **Erreur API** : `SearchService` renvoie `{ docs: [], totalResults: 0 }` en cas d'erreur (catchError) ; les vues affichent alors 0 document sans planter.
+- **Visualiseur** : barre de progression (`loadingProgress`), `onPdfLoaded` (loading=false), `onError` (loading=false). Si l'URL chiffrée est invalide ou absente, `loading` passe à false et aucun PDF n'est affiché.
+- **SSR / navigation** : le chargement des données est gardé côté navigateur (`isPlatformBrowser`) ; côté serveur, seules les sources statiques sont initialisées.
+
+## Accessibilité et bonnes pratiques
+
+- **Liens externes** : `rel="noopener noreferrer"` + `target="_blank"` systématiques.
+- **Labels** : `aria-label` renseignés sur les liens BAU et Thèses et mémoire ; `alt` sur les images (`[alt]="collection.label"` ou `b.title`).
+- **Lazy loading** : `loading="lazy"` sur les images de cartes/vignettes.
+- **Responsive** : navigation mobile avec menu repliable (bouton toggle dans `app-header`), grilles `grid-cols-1 md:grid-cols-2 lg:grid-cols-3`.
+- **Animations** : directive `appScrollAnimation` (fade-up) avec délais progressifs ; respecte le rendu sans JS côté serveur.
+
+## Données des collections (descriptions)
+
+- **P.A.MA.L** : « Périodiques Anciens déposés à la Bibliothèque et Archives Universitaires de l'Université d'Antananarivo. »
+- **BUTANA** : « Fonds documentaire de la bibliothèque universitaire d'Antananarivo. »
+- **Livres** : « Les livres de la Bibliothèque et Archives Universitaires - Antananarivo - Madagascar. »
+- **Fonds Grandidier** : « La collection de référence sur l'histoire et la culture malgache. »
+- **Thèses** : « Découvrez les thèses de l'Université d'Antananarivo sur un portail dédié et enrichi. » (collection externe).
+
+## Référence rapide des URLs de l'application
+
+| Élément | URL / route | Type |
+| --- | --- | --- |
+| Accueil | `/` | interne |
+| Aide | `/help` | interne |
+| Recherche avancée | `/search` | interne |
+| Résultats | `/result` | interne |
+| Liste des collections | `/collection` | interne |
+| Recherche par collection | `/collection/:collection` | interne |
+| Résultats par collection | `/collection/:collection/result` | interne |
+| Visualiseur | `/collection/:collection/:title`, `/:collection/files/:title` | interne |
+| Vue Omeka | `/omeka/:collection` | interne |
+| 404 | `**` | interne |
+| Site BAU | `https://biblio.univ-antananarivo.mg` | externe (header/footer) |
+| Thèses et mémoire | `https://biblio.univ-antananarivo.mg/theses` | externe (header/footer + carte) |
+| API items | `https://biblio.univ-antananarivo.mg/omeka/api/items` | API |
+| API media | `https://biblio.univ-antananarivo.mg/omeka/api/media/{id}` | API |
+| E-mail institutionnel | `bu@univ-antananarivo.mg` | contact |
