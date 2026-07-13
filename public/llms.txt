@@ -1,0 +1,91 @@
+# Bibliothèque Numérique (Projet « Didier »)
+
+> Plateforme web Angular de consultation et de recherche documentaire pour la Bibliothèque et Archives Universitaires (BAU) de l'Université d'Antananarivo, Madagascar. Elle expose les fonds patrimoniaux (livres, périodiques, thèses, fonds historique) via l'API Omeka S et propose une recherche avancée, une pagination, un visualiseur de documents PDF et une interface multilingue (français).
+
+## Aperçu technique
+
+- **Framework** : Angular 20 (standalone components, routing, reactive forms).
+- **Langage** : TypeScript, HTML, CSS (Tailwind CSS + styles globaux).
+- **Cible de build** : application Angular autonome (`@angular/build:application`), bundle généré dans `dist/`.
+- **Environnement** : les URLs de base proviennent de `src/environments/environment.ts` (`production: false` en dev, remplacé par `environment.prod.ts` en production).
+- **Fichiers statiques** : tout le contenu de `public/` est copié à la racine du site (images, favicon, worker PDF). Ce fichier `llms.txt` est donc servi à `https://<domaine>/llms.txt`.
+
+## Fonctionnalités principales
+
+- Page d'accueil présentant les collections patrimoniales (cartes avec compteur de documents en direct).
+- Liste des collections (`/collection`) avec comptage dynamique des documents via l'API.
+- Recherche avancée (`/search` et `/collection/:collection`) : champ libre, titre, auteur, mots-clés (séparés par virgules, logique AND), source, et nombre de résultats par page. (Les champs de plage d'années « Début / Fin » existent dans le code mais sont actuellement commentés dans `search.html`.)
+- Résultats de recherche (`/result`, `/collection/:collection/result`) : liste paginée, tri (titre, auteur, année), filtrage côté client, popups de description, pagination par URL.
+- Vue de collection Omeka (`/omeka/:collection`) : parcours complet d'un fonds avec pagination, filtrage et tri.
+- Visualiseur de fichiers (`/collection/:collection/:title`, `/:collection/files/:title`) : affichage/lecture de documents (PDF) via `pdf.worker.min.mjs` et `sessionStorage`.
+- Page d'aide (`/help`).
+- Page 404 (`**`).
+- En-tête (`header`) et pied de page (`footer`) contenant des liens vers le site institutionnel BAU et le portail des thèses.
+
+## Routes de l'application (Angular Router)
+
+- `/` → `MainLayout` (accueil + enfants `HomeComponent`, `Help`).
+- `/help` → page d'aide.
+- `/search` → formulaire de recherche avancée global.
+- `/result` → résultats de recherche globale.
+- `/collection` → `CollectionListing` (liste des collections).
+- `/collection/:collection` → recherche restreinte à une collection.
+- `/collection/:collection/result` → résultats restreints à une collection.
+- `/collection/:collection/:title` → visualiseur de document.
+- `/omeka/:collection` → vue Omeka d'un fonds.
+- `/:collection/files/:title` → visualiseur de document (route alternative).
+- `**` → page non trouvée (`NotFound`).
+
+## URLs et endpoints clés
+
+- **Site institutionnel BAU** : https://biblio.univ-antananarivo.mg
+  - Lien ajouté dans l'en-tête et le pied de page (texte / `aria-label` : « Bibliothèque et Archive Universitaire d'Antananarivo »).
+- **Portail des thèses et mémoires** : https://biblio.univ-antananarivo.mg/theses
+  - Lien « Thèses et mémoire » dans l'en-tête et le pied de page ; ouvre une nouvelle fenêtre (`target="_blank"`, `rel="noopener noreferrer"`). La collection « Thèses » est marquée `isExternal` et redirige vers ce portail.
+- **API Omeka S (base)** : https://biblio.univ-antananarivo.mg/omeka
+  - `GET {base}/api/items` : recherche d'items (paramètres `search`, `property[...]`, `item_set_id`, `page`, `per_page`). Le total est lu dans l'en-tête `Omeka-S-Total-Results`.
+  - `GET {base}/api/media/{id}` : métadonnées d'un média (URL d'origine `o:original_url`, vignettes `o:thumbnail_urls`).
+- **URLs historiques** : l'API renvoie parfois l'ancienne adresse IP `https://192.168.1.183` ; elle est systématiquement réécrite en `https://biblio.univ-antananarivo.mg/omeka` côté client (`transformUrls` dans `search.service.ts`).
+- **Proxy de développement** (`proxy.conf.json`, uniquement en `ng serve`) :
+  - `/api` → `http://localhost:3000`
+  - `/files` → `http://192.168.1.183`
+
+## Mapping des collections (item_set_id Omeka S)
+
+Utilisé par `resolveSourceId` pour traduire le nom de collection en identifiant d'item set :
+
+- `Livres` → `4`
+- `P.A.MA.L` (Périodiques Anciens) → `2`
+- `BUTANA` (fonds bibliothèque universitaire) → `3`
+- `fonds-grandidier` (histoire et culture malgache) → `1`
+- `theses` → collection externe (`isExternal: true`), ouvre https://biblio.univ-antananarivo.mg/theses
+
+## Paramètres de recherche supportés (service SearchService)
+
+- `q` : recherche plein texte (`search`).
+- `title` : filtre sur `dcterms:title` (type `in`).
+- `author` : filtre sur `dcterms:creator` (type `in`).
+- `subject` : mots-clés séparés par virgules, filtrés en logique AND côté client sur description + sujets.
+- `source` : nom de collection (résolu en `item_set_id`) ou `* / all` pour tout.
+- `limit` / `per_page` : nombre de résultats par page.
+- `page` : pagination.
+- `yearStart` / `yearEnd` : plage d'années (filtrage local de secours ; voir note de commentaire dans le formulaire).
+
+## Recherche et pagination
+
+- La pagination est pilotée par l'URL (`queryParams` : `page`, `filterCriteria`, `filterValue`, `limit`, `source`).
+- Le filtrage (titre, description, auteur, année) et le tri (titre, auteur, année, asc/desc) sont effectués côté client après récupération des items.
+- Les descriptions de documents sont parfois injectées dans l'URL (`bookId`, `bookDescription`) pour le SEO sans rechargement (`window.history.replaceState`).
+
+## Sécurité / comportements UI
+
+- Désactivation du clic droit et de certains raccourcis développeur (F12, Ctrl+Shift+I/J/C, Ctrl+U) via `HostListener` dans `CollectionListing`.
+- Les liens externes utilisent `rel="noopener noreferrer"`.
+- Les URLs de documents PDF sont encodées en base64 (`btoa`/`atob`) puis transmises au visualiseur via `sessionStorage`.
+
+## Développement
+
+- `ng serve` → serveur de dev sur http://localhost:4200/ (avec proxy défini dans `proxy.conf.json`).
+- `ng build` → build de production dans `dist/`.
+- `ng test` → tests unitaires (Karma).
+- Nom interne du projet Angular : `didier`.
