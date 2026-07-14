@@ -27,7 +27,7 @@ import { RouterModule, Router } from '@angular/router';
 
         <!-- Desktop Navigation -->
         <nav class="hidden md:flex items-center gap-8">
-          <a routerLink="/" routerLinkActive="text-green-600 border-green-600" [routerLinkActiveOptions]="{exact: true}"
+          <a [href]="biblioUrl" target="_blank" rel="noopener noreferrer" aria-label="Accueil"
              class="text-sm font-semibold text-gray-600 hover:text-green-600 transition-all border-b-2 border-transparent py-1 cursor-pointer">
             Accueil
           </a>
@@ -38,10 +38,6 @@ import { RouterModule, Router } from '@angular/router';
           <a [href]="thesesUrl" target="_blank" rel="noopener noreferrer" aria-label="Thèses et mémoire"
              class="text-sm font-semibold text-gray-600 hover:text-green-600 transition-all border-b-2 border-transparent py-1 cursor-pointer">
             Thèses et mémoire
-          </a>
-          <a [href]="biblioUrl" target="_blank" rel="noopener noreferrer" aria-label="Bibliothèque et Archive Universitaire d'Antananarivo"
-             class="text-sm font-semibold text-gray-600 hover:text-green-600 transition-all border-b-2 border-transparent py-1 cursor-pointer">
-            Bibliothèque et Archive Universitaire d'Antananarivo
           </a>
           <a routerLink="/help" routerLinkActive="text-green-600 border-green-600"
              class="text-sm font-semibold text-gray-600 hover:text-green-600 transition-all border-b-2 border-transparent py-1 cursor-pointer">
@@ -65,7 +61,7 @@ import { RouterModule, Router } from '@angular/router';
       <!-- Mobile Navigation -->
       <div *ngIf="isMenuOpen" class="md:hidden bg-white border-t border-gray-100 animate-slideDown">
         <nav class="flex flex-col py-4 px-6 space-y-4 shadow-xl">
-          <a routerLink="/" (click)="isMenuOpen = false" routerLinkActive="text-green-600 bg-green-50" [routerLinkActiveOptions]="{exact: true}"
+          <a [href]="biblioUrl" target="_blank" rel="noopener noreferrer" (click)="isMenuOpen = false" aria-label="Accueil"
              class="text-base font-medium text-gray-600 hover:text-green-600 hover:bg-green-50 px-4 py-2 rounded-xl transition-all">
             Accueil
           </a>
@@ -76,10 +72,6 @@ import { RouterModule, Router } from '@angular/router';
           <a [href]="thesesUrl" target="_blank" rel="noopener noreferrer" (click)="isMenuOpen = false" aria-label="Thèses et mémoire"
              class="text-base font-medium text-gray-600 hover:text-green-600 hover:bg-green-50 px-4 py-2 rounded-xl transition-all">
             Thèses et mémoire
-          </a>
-          <a [href]="biblioUrl" target="_blank" rel="noopener noreferrer" (click)="isMenuOpen = false" aria-label="Bibliothèque et Archive Universitaire d'Antananarivo"
-             class="text-base font-medium text-gray-600 hover:text-green-600 hover:bg-green-50 px-4 py-2 rounded-xl transition-all">
-            Bibliothèque et Archive Universitaire d'Antananarivo
           </a>
           <a routerLink="/help" (click)="isMenuOpen = false" routerLinkActive="text-green-600 bg-green-50"
              class="text-base font-medium text-gray-600 hover:text-green-600 hover:bg-green-50 px-4 py-2 rounded-xl transition-all">
